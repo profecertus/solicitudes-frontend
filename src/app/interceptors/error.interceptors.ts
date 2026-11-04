@@ -20,7 +20,7 @@ export const errorInterceptors:HttpInterceptorFn = (req, next) => {
 
             if (error.status === 0){
                 // Sin respuesta del servidor (caído, CORS, red). Con withFetch, error.error es un TypeError.
-                mensajeError = 'No fue posible conectar con el servidor backend en localhost:5000';
+                mensajeError = 'No fue posible conectar con el servidor backend en localhost:5072';
             }else if(error.error && typeof error.error === 'object'){
                 const problem = error.error as ProblemDetails;
                 if(problem.detail){

@@ -46,6 +46,23 @@ export interface CrearSolicitudDetalleDto{
 
 export type SolicitudDetalleForm = CrearSolicitudDetalleDto;
 
+export interface TimelineItem{
+    id: number;
+    solicitudId: number;
+    estadoResultante: EstadoSolicitud;
+    responsableId: number;
+    responsableNombre: string;
+    comentario: string;
+    fechaAccion: string;
+}
+
+export enum RolUsuario{
+    Solicitante = 'Solicitante',
+    Revisor = 'Revisor',
+    Aprobador = 'Aprobador',
+    Tesoreria = 'Tesoreria'
+}
+
 export interface PagedResult<T>{
     items: T[];
     totalItems: number;
@@ -53,3 +70,25 @@ export interface PagedResult<T>{
     tamanoPagina: number;
     totalPaginas: number;
 }
+
+export interface Usuario{
+    id: number,
+    nombre: string,
+    correo: string,
+    activo: boolean,
+    fechaCreacion: string,
+    roles: RolItem[]
+  }
+
+  export interface RolItem{
+    id: number,
+    nombre: string,
+    limiteAprobacion: number,
+  }
+
+  export interface UsuarioActivo{
+    id: number;
+    nombre: string;
+    email: string;
+    rol: RolUsuario;
+  }

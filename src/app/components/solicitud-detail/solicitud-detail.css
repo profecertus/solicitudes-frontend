@@ -1,0 +1,32 @@
+.card {
+  border-radius: 12px;
+}
+
+.table th {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: #475569;
+  text-transform: uppercase;
+}
+
+.action-workflow-card {
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  border: 1px solid #e2e8f0 !important;
+}
+
+.timeline-container {
+  position: relative;
+  margin-top: 10px;
+}
+
+.timeline-step {
+  padding-left: 10px;
+}
+
+.timeline-card {
+  transition: all 0.15s ease-in-out;
+}
+
+.timeline-card:hover {
+  background-color: #f1f5f9 !important;
+}
