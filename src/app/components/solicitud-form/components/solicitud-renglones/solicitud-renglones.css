@@ -1,0 +1,36 @@
+.tabla-renglones .col-cantidad {
+  width: 120px;
+}
+ 
+.tabla-renglones .col-precio {
+  width: 160px;
+}
+ 
+.tabla-renglones .col-importe {
+  width: 140px;
+}
+ 
+.tabla-renglones .col-accion {
+  width: 50px;
+}
+ 
+.tabla-renglones thead th {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: var(--nh-dark);
+}
+ 
+.tabla-renglones input[type='number']::-webkit-outer-spin-button,
+.tabla-renglones input[type='number']::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+ 
+.tabla-renglones input[type='number'] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+  text-align: right;
+}
+ 
+ 

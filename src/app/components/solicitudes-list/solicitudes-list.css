@@ -1,0 +1,54 @@
+.page-title {
+  font-size: 2.1rem;
+  font-weight: 500;
+  color: #1e293b;
+  letter-spacing: -0.5px;
+}
+ 
+.page-subtitle {
+  font-size: 0.95rem;
+  color: #64748b;
+}
+ 
+.btn-action-primary {
+  background-color: #024b98;
+  border-color: #024b98;
+  padding: 8px 22px;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+ 
+.btn-action-primary:hover {
+  background-color: #003366;
+  border-color: #003366;
+}
+ 
+.search-card {
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+}
+ 
+.table-card {
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+}
+ 
+.table th {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: #475569;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+ 
+.table td {
+  padding-top: 14px;
+  padding-bottom: 14px;
+}
+ 
+.badge {
+  font-size: 0.8rem;
+  padding: 6px 12px;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+}

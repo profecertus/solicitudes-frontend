@@ -1,0 +1,4 @@
+/* Contenedor de notificaciones por encima del resto de la interfaz */
+.toast-stack {
+  z-index: 1100;
+}

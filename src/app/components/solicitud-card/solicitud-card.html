@@ -1,0 +1,27 @@
+<div class="card h-100 shadow-sm border-0">
+  <div class="card-header bg-white d-flex justify-content-between align-items-center border-bottom-0 pt-3">
+    <span class="badge bg-secondary font-monospace">{{ solicitud.codigo }}</span>
+    <span class="badge" [ngClass]="obtenerClaseBadge(solicitud.estadoNombre)">
+      {{ solicitud.estadoNombre }}
+    </span>
+  </div>
+  <div class="card-body">
+    <h5 class="card-title fw-bold text-truncate" title="{{ solicitud.motivo }}">{{ solicitud.motivo }}</h5>
+    <div class="d-flex justify-content-between text-muted small mb-2">
+      <span><i class="bi bi-building me-1"></i>{{ solicitud.centroCostoNombre }}</span>
+      <span><i class="bi bi-calendar3 me-1"></i>{{ solicitud.fechaCreacion | date:'dd/MM/yyyy' }}</span>
+    </div>
+    <div class="border rounded p-2 bg-light mb-3">
+      <small class="text-muted d-block">Monto Total Estimado:</small>
+      <span class="fs-5 fw-bold text-primary">S/ {{ solicitud.montoTotal | number:'1.2-2' }}</span>
+    </div>
+    <div class="small text-secondary">
+      <i class="bi bi-list-check me-1"></i>{{ solicitud.detalles.length }} renglón(es) de gasto
+    </div>
+  </div>
+  <div class="card-footer bg-white border-top-0 pb-3">
+    <button class="btn btn-outline-primary btn-sm w-100">
+      <i class="bi bi-eye me-1"></i>Ver Detalle y Trazabilidad
+    </button>
+  </div>
+</div>

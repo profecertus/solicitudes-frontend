@@ -1,0 +1,8 @@
+.input-group:focus-within .input-group-text,
+.input-group:focus-within .form-control{
+    border-color: var(--nh-accent);
+}
+
+.input-group .form-control:focus{
+    box-shadow: none;
+}

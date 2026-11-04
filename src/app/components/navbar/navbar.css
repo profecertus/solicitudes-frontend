@@ -1,0 +1,7 @@
+.nh-navbar{
+    background-color:  var(--nh-primary, #003366);
+}
+
+.nh-navbar_subtitulo{
+    font-size: 0.75rem;
+}
