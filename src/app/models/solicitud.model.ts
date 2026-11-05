@@ -58,6 +58,7 @@ export interface TimelineItem{
 }
 
 export enum RolUsuario{
+    Usuario = 'Usuario',
     Solicitante = 'Solicitante',
     Revisor = 'Revisor',
     Aprobador = 'Aprobador',

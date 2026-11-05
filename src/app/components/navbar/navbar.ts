@@ -10,7 +10,7 @@ import { LoadingServices } from '../../services/loading.service';
   templateUrl: './navbar.html',
   styleUrl: './navbar.css',
 })
-export class Navbar {
+export class Navbar {  
   loadingService = inject(LoadingServices);
   notificationService = inject(NotificationService);
   rolService = inject(RolService);

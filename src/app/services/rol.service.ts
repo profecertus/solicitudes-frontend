@@ -1,4 +1,4 @@
-import { inject, Injectable, OnInit, signal } from "@angular/core";
+import { computed, inject, Injectable, signal } from "@angular/core";
 import { RolUsuario, Usuario, UsuarioActivo } from "../models/solicitud.model";
 import { HttpClient } from "@angular/common/http";
 import { environment } from "../../environments/environment";
@@ -14,52 +14,52 @@ export class RolService {
   //Emular el usuario actual, en un escenario real, esto se obtendría del token de autenticación o del backend
   readonly usuarioActual = signal<UsuarioActivo>({
     id: 1,
-    nombre: 'Edwin',
-    email: 'edwin@miempresa.com',
-    rol: RolUsuario.Solicitante
+    nombre: 'Ana Torres',
+    email: 'eana.torres@solicitudes.com',
+    rol: RolUsuario.Usuario
   });
   
-  readonly rolesDisponibles:{
-    rol:RolUsuario,
-    id:number,
-    nombre:string
-    titulo:string
-  }[] = []
-
-  
+  // computed: se recalcula solo cuando cambia el signal usuarios (necesario en modo zoneless)
+  readonly rolesDisponibles = computed(() => {
+    const roles: {
+      rol: RolUsuario,
+      id: number,
+      usuarioId: number,
+      nombre: string,
+      correo: string,
+      titulo: string
+    }[] = [];
+    for (const usuario of this.usuarios()) {
+      for (const rolItem of usuario.roles) {
+        if (!roles.some(r => r.id === rolItem.id)) {
+          roles.push({
+            rol: rolItem.nombre as RolUsuario,
+            id: rolItem.id,
+            usuarioId: usuario.id,
+            nombre: usuario.nombre,
+            correo: usuario.correo,
+            titulo: `Rol: ${rolItem.nombre}, Límite de Aprobación: ${rolItem.limiteAprobacion}`
+          });
+        }
+      }
+    }
+    return roles;
+  });
 
   constructor() {
     this.UsuarioService.getUsuarios().subscribe({
-      next: (usuarios) => {
-        this.usuarios.set(usuarios);
-        this.rolesDisponibles.splice(0, this.rolesDisponibles.length); // Limpiar el array antes de llenarlo nuevamente
-        usuarios.forEach(usuario => {
-          usuario.roles.forEach(rolItem => {
-            const rolExistente = this.rolesDisponibles.find(r => r.id === rolItem.id);
-            if (!rolExistente) {
-              this.rolesDisponibles.push({
-                rol: rolItem.nombre as RolUsuario,
-                id: rolItem.id,
-                nombre: usuario.nombre,
-                titulo: `Rol: ${rolItem.nombre}, Límite de Aprobación: ${rolItem.limiteAprobacion}`
-              });
-            }
-          });
-        });        
-      },
-      error: (error) => {
-        console.error('Error al obtener los usuarios en RolService:', error);
-      }
-    });    
+      next: (usuarios) => this.usuarios.set(usuarios),
+      error: (error) => console.error('Error al obtener los usuarios en RolService:', error)
+    });
   }
 
   cambiarRol(nuevoRol: RolUsuario): void {
-    const item = this.rolesDisponibles.find(r => r.rol === nuevoRol);
+    const item = this.rolesDisponibles().find(r => r.rol === nuevoRol);
     if(item){
       this.usuarioActual.set({
-        id:item.id,
-        nombre:item.nombre,
-        email: `${item.rol.toLocaleLowerCase()}@miempresa.com`,
+        id: item.usuarioId,
+        nombre: item.nombre,
+        email: item.correo,
         rol: item.rol
       });
     }

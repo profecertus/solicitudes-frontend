@@ -17,13 +17,12 @@
             <select
                 class="form-select form-select-sm border-0 fw-semibold text-dark shadow-sm bg-white"
                 style="min-width: 170px;"
-                [value]="rolService.usuarioActual().rol"
                 (change)="onRolChange($event)"
             >
-                @for (item of rolService.rolesDisponibles; track item.rol) {
-                <option [value]="item.rol">
-                    {{ item.nombre }} ({{ item.titulo }})
-                </option>
+                @for (item of rolService.rolesDisponibles(); track item.rol) {
+                    <option [value]="item.rol" [selected]="item.rol === rolService.usuarioActual().rol">
+                        {{ item.nombre }} ({{ item.titulo }})
+                    </option>
                 }
             </select>
             </div>
