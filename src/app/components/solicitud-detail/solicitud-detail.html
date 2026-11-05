@@ -1,1 +1,334 @@
-<p>solicitud-detail works!</p>
+<div class="mb-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
+  <a routerLink="/solicitudes" class="btn btn-outline-secondary btn-sm">
+    <i class="bi bi-arrow-left me-1"></i>Volver a la Bandeja
+  </a>
+
+  <!-- Indicador del Rol Activo Actual -->
+  <div class="badge bg-light text-secondary border px-3 py-2 small">
+    <i class="bi bi-person-fill me-1"></i>
+    Operando como: <strong class="text-dark">{{ rolService.usuarioActual().nombre }}</strong> ({{ rolService.usuarioActual().rol }})
+  </div>
+</div>
+@if (solicitud()) {
+
+  <!-- BARRA DE ACCIÓN WORKFLOW SEGÚN ESTADO Y ROL ACTIVO -->
+  <div class="card shadow-sm border-0 mb-4 action-workflow-card">
+    <div class="card-body p-3 d-flex justify-content-between align-items-center flex-wrap gap-3">
+      <div>
+        <div class="small text-muted fw-semibold text-uppercase">Acciones de Transición de Workflow</div>
+        <div class="fw-bold text-dark">
+          Estado actual: <span [class]="obtenerClaseBadge(solicitud()!.estado)">{{ solicitud()!.estadoNombre }}</span>
+        </div>
+      </div>
+
+      <div class="d-flex align-items-center gap-2 flex-wrap">
+        <!-- 1. Rol Solicitante: Enviar a Revisión si está en Borrador -->
+        @if (solicitud()!.estado === 1 && esRol(RolUsuario.Solicitante)) {
+          <button type="button" class="btn btn-primary shadow-sm" (click)="enviarSolicitud()">
+            <i class="bi bi-send me-1"></i>Enviar a Revisión
+          </button>
+        }
+
+        <!-- 2. Rol Revisor: Iniciar Revisión si está en Enviada -->
+        @if (solicitud()!.estado === 2 && esRol(RolUsuario.Revisor)) {
+          <button type="button" class="btn btn-warning text-dark shadow-sm" (click)="iniciarRevision()">
+            <i class="bi bi-hourglass-split me-1"></i>Iniciar Revisión Técnica
+          </button>
+        }
+
+        <!-- 3. Rol Aprobador: Dictamen de Aprobación o Rechazo si está EnRevision -->
+        @if (solicitud()!.estado === 3 && esRol(RolUsuario.Aprobador)) {
+          <button type="button" class="btn btn-success shadow-sm" (click)="abrirModalDictamen('aprobar')">
+            <i class="bi bi-check-circle me-1"></i>Aprobar Solicitud
+          </button>
+          <button type="button" class="btn btn-outline-danger shadow-sm" (click)="abrirModalDictamen('rechazar')">
+            <i class="bi bi-x-circle me-1"></i>Rechazar
+          </button>
+        }
+
+        <!-- 4. Rol Tesorería: Registrar Pago si está Aprobada -->
+        @if (solicitud()!.estado === 4 && esRol(RolUsuario.Tesoreria)) {
+          <button type="button" class="btn btn-primary shadow-sm" (click)="abrirModalPago()">
+            <i class="bi bi-cash-coin me-1"></i>Registrar Desembolso y Pago
+          </button>
+        }
+
+        <!-- Mensajes informativos de estado si no hay acciones directas con el rol activo -->
+        @if (solicitud()!.estado === 1 && !esRol(RolUsuario.Solicitante)) {
+          <span class="text-muted small"><i class="bi bi-info-circle me-1"></i>El Solicitante debe enviar el borrador.</span>
+        }
+        @if (solicitud()!.estado === 2 && !esRol(RolUsuario.Revisor)) {
+          <span class="text-muted small"><i class="bi bi-info-circle me-1"></i>Enviada: Esperando inicio de revisión técnica.</span>
+        }
+        @if (solicitud()!.estado === 3 && !esRol(RolUsuario.Aprobador)) {
+          <span class="text-muted small"><i class="bi bi-info-circle me-1"></i>En Revisión: Requiere dictamen de Gerencia.</span>
+        }
+        @if (solicitud()!.estado === 4 && !esRol(RolUsuario.Tesoreria)) {
+          <span class="text-muted small"><i class="bi bi-info-circle me-1"></i>Aprobada: Pendiente de pago por Tesorería.</span>
+        }
+        @if (solicitud()!.estado === 5) {
+          <span class="badge bg-danger px-3 py-2 fs-6"><i class="bi bi-x-circle me-1"></i>Solicitud Rechazada Definitivamente</span>
+        }
+        @if (solicitud()!.estado === 6) {
+          <span class="badge bg-primary px-3 py-2 fs-6"><i class="bi bi-check2-all me-1"></i>Solicitud Pagada y Archivada</span>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- TARJETA PRINCIPAL: DETALLES DE LA SOLICITUD -->
+  <div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center flex-wrap gap-2">
+      <div>
+        <h4 class="fw-bold mb-1 text-primary">
+          <i class="bi bi-file-earmark-text me-2"></i>Solicitud {{ solicitud()!.codigo }}
+        </h4>
+        <p class="text-muted small mb-0">Detalle de registro y partidas de gasto presupuestal</p>
+      </div>
+      <span [class]="obtenerClaseBadge(solicitud()!.estado) + ' fs-6 px-3 py-2'">
+        {{ solicitud()!.estadoNombre }}
+      </span>
+    </div>
+
+    <div class="card-body p-4">
+      <div class="row g-3 mb-4">
+        <div class="col-12 col-md-6">
+          <label class="text-muted small fw-semibold text-uppercase">Motivo del Gasto</label>
+          <div class="fs-5 fw-bold text-dark">{{ solicitud()!.motivo }}</div>
+        </div>
+        <div class="col-6 col-md-3">
+          <label class="text-muted small fw-semibold text-uppercase">Solicitante</label>
+          <div class="fw-semibold text-dark">{{ solicitud()!.solicitanteNombre }}</div>
+        </div>
+        <div class="col-6 col-md-3">
+          <label class="text-muted small fw-semibold text-uppercase">Centro de Costo</label>
+          <div class="fw-semibold text-dark">{{ solicitud()!.centroCostoNombre || 'General' }}</div>
+        </div>
+      </div>
+
+      <!-- TABLA DE PARTIDAS -->
+      <div class="border-top pt-4">
+        <h5 class="fw-bold mb-3">Partidas Presupuestales</h5>
+        <div class="table-responsive">
+          <table class="table table-bordered table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th style="width: 50px;" class="text-center">#</th>
+                <th>Concepto</th>
+                <th style="width: 120px;" class="text-center">Cantidad</th>
+                <th style="width: 160px;" class="text-end">Precio Unit. (S/)</th>
+                <th style="width: 160px;" class="text-end">Subtotal (S/)</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of solicitud()!.detalles; track item.id; let i = $index) {
+                <tr>
+                  <td class="text-center text-muted">{{ i + 1 }}</td>
+                  <td class="fw-semibold">{{ item.concepto }}</td>
+                  <td class="text-center">{{ item.cantidad }}</td>
+                  <td class="text-end">S/ {{ item.precioUnitario | number:'1.2-2' }}</td>
+                  <td class="text-end fw-bold">S/ {{ (item.importe || (item.cantidad * item.precioUnitario)) | number:'1.2-2' }}</td>
+                </tr>
+              }
+            </tbody>
+            <tfoot>
+              <tr class="table-light">
+                <td colspan="4" class="text-end fw-bold text-uppercase py-3">Monto Total:</td>
+                <td class="text-end fw-bold text-primary fs-5 py-3">
+                  PEN {{ solicitud()!.montoTotal | number:'1.2-2' }}
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECCIÓN HISTORIAL DE TRAZABILIDAD Y AUDITORÍA (TIMELINE SIN SUBCOMPONENTES) -->
+  <div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center flex-wrap gap-2">
+      <div>
+        <h5 class="fw-bold mb-0 text-dark">
+          <i class="bi bi-clock-history me-2 text-primary"></i>Historial de Trazabilidad y Aprobaciones
+        </h5>
+        <small class="text-muted">Registro inmutable de transiciones y dictámenes de workflow</small>
+      </div>
+      <button type="button" class="btn btn-outline-secondary btn-sm" (click)="cargarTimeline()">
+        <i class="bi bi-arrow-clockwise me-1"></i>Actualizar
+      </button>
+    </div>
+
+    <div class="card-body p-4">
+      @if (eventosTimeline().length > 0) {
+        <div class="timeline-container ps-3">
+          @for (item of eventosTimeline(); track item.id; let last = $last) {
+            <div class="timeline-step position-relative pb-4" [class.border-start]="!last" style="border-color: #cbd5e1 !important; border-width: 2px !important;">
+              <!-- Icono circular del estado -->
+              <div class="timeline-icon-dot position-absolute top-0 start-0 translate-middle bg-white rounded-circle shadow-sm d-flex align-items-center justify-content-center"
+                   style="width: 38px; height: 38px; border: 2px solid #024b98;">
+                <i [class]="'bi ' + obtenerIconoEstado(item.estadoResultante) + ' fs-5'"></i>
+              </div>
+
+              <!-- Contenido del evento -->
+              <div class="timeline-card ms-4 p-3 rounded bg-light border">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-1">
+                  <div class="d-flex align-items-center gap-2">
+                    <span [class]="obtenerClaseBadge(item.estadoResultante)">
+                      {{ item.estadoNombre }}
+                    </span>
+                    <strong class="text-dark small">{{ item.responsableNombre }}</strong>
+                  </div>
+                  <small class="text-muted">
+                    <i class="bi bi-calendar3 me-1"></i>{{ item.fechaAccion | date:'dd/MM/yyyy HH:mm' }}
+                  </small>
+                </div>
+                @if (item.comentario) {
+                  <p class="mb-0 mt-2 text-secondary fst-italic small bg-white p-2 rounded border-start border-3 border-primary">
+                    "{{ item.comentario }}"
+                  </p>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      } @else {
+        <div class="text-center py-4 text-muted">
+          <i class="bi bi-hourglass-bottom fs-2 mb-2 d-block"></i>
+          <div>No se registran transiciones previas para esta solicitud.</div>
+        </div>
+      }
+    </div>
+  </div>
+
+} @else {
+  <div class="alert alert-warning">
+    <i class="bi bi-exclamation-triangle me-2"></i>Cargando o no se encontró la solicitud solicitada.
+  </div>
+}
+
+<!-- MODAL 1: DICTAMEN DE APROBACIÓN / RECHAZO (INLINE BOOTSTRAP SIN SUBCOMPONENTES) -->
+@if (modalDictamenAbierto() && solicitud()) {
+  <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.55);" role="dialog">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow-lg">
+        <div class="modal-header border-bottom py-3" [class.bg-success-subtle]="dictamenTipo() === 'aprobar'" [class.bg-danger-subtle]="dictamenTipo() === 'rechazar'">
+          <h5 class="modal-title fw-bold" [class.text-success]="dictamenTipo() === 'aprobar'" [class.text-danger]="dictamenTipo() === 'rechazar'">
+            @if (dictamenTipo() === 'aprobar') {
+              <i class="bi bi-check-circle-fill me-2"></i>Aprobar Solicitud {{ solicitud()!.codigo }}
+            } @else {
+              <i class="bi bi-x-circle-fill me-2"></i>Rechazar Solicitud {{ solicitud()!.codigo }}
+            }
+          </h5>
+          <button type="button" class="btn-close" (click)="cancelarDictamen()" aria-label="Cerrar"></button>
+        </div>
+
+        <div class="modal-body py-4">
+          <p class="text-muted mb-3">
+            @if (dictamenTipo() === 'aprobar') {
+              Ingrese una observación o comentario conforme antes de autorizar la solicitud de compra para Tesorería:
+            } @else {
+              Debe especificar el motivo o justificación técnica por la cual se rechaza definitivamente esta solicitud:
+            }
+          </p>
+
+          <div class="mb-3">
+            <label for="dictamenObs" class="form-label fw-semibold">
+              {{ dictamenTipo() === 'aprobar' ? 'Comentario / Observación (Opcional):' : 'Motivo de Rechazo (Obligatorio):' }}
+            </label>
+            <textarea
+              id="dictamenObs"
+              class="form-control"
+              rows="3"
+              [ngModel]="dictamenComentario()"
+              (ngModelChange)="dictamenComentario.set($event)"
+              [placeholder]="dictamenTipo() === 'aprobar' ? 'Ej: Aprobado conforme a presupuesto...' : 'Ej: Se rechaza por no contar con sustento técnico...'"
+            ></textarea>
+          </div>
+        </div>
+
+        <div class="modal-footer border-top pt-2">
+          <button type="button" class="btn btn-secondary" (click)="cancelarDictamen()">
+            Cancelar
+          </button>
+          <button
+            type="button"
+            [class]="dictamenTipo() === 'aprobar' ? 'btn btn-success' : 'btn btn-danger'"
+            [disabled]="dictamenTipo() === 'rechazar' && !dictamenComentario().trim()"
+            (click)="confirmarDictamen()"
+          >
+            @if (dictamenTipo() === 'aprobar') {
+              <i class="bi bi-check-circle me-1"></i>Confirmar Aprobación
+            } @else {
+              <i class="bi bi-x-circle me-1"></i>Confirmar Rechazo
+            }
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- MODAL 2: REGISTRO DE DESEMBOLSO Y PAGO TESORERÍA (INLINE BOOTSTRAP SIN SUBCOMPONENTES) -->
+@if (modalPagoAbierto() && solicitud()) {
+  <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.55);" role="dialog">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow-lg">
+        <div class="modal-header border-bottom py-3 bg-primary-subtle">
+          <h5 class="modal-title fw-bold text-primary">
+            <i class="bi bi-cash-stack me-2"></i>Registrar Desembolso — Tesorería
+          </h5>
+          <button type="button" class="btn-close" (click)="cancelarPago()" aria-label="Cerrar"></button>
+        </div>
+
+        <div class="modal-body py-4">
+          <div class="alert alert-info py-2 px-3 small d-flex justify-content-between align-items-center mb-3">
+            <span>Solicitud: <strong>{{ solicitud()!.codigo }}</strong></span>
+            <span class="fs-6 fw-bold">PEN {{ solicitud()!.montoTotal | number:'1.2-2' }}</span>
+          </div>
+
+          <div class="mb-3">
+            <label for="medioPago" class="form-label fw-semibold">Medio de Pago <span class="text-danger">*</span></label>
+            <select
+              id="medioPago"
+              class="form-select"
+              [ngModel]="pagoMedio()"
+              (ngModelChange)="pagoMedio.set($event)"
+            >
+              @for (m of mediosPagoDisponibles; track m) {
+                <option [value]="m">{{ m }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label for="nroOp" class="form-label fw-semibold">N° de Operación / Referencia Bancaria <span class="text-danger">*</span></label>
+            <input
+              id="nroOp"
+              type="text"
+              class="form-control"
+              [ngModel]="pagoOperacion()"
+              (ngModelChange)="pagoOperacion.set($event)"
+              placeholder="Ej: OP-987654321"
+            />
+            <div class="form-text text-muted">Constancia de trazabilidad bancaria en el sistema ERP.</div>
+          </div>
+        </div>
+
+        <div class="modal-footer border-top pt-2">
+          <button type="button" class="btn btn-secondary" (click)="cancelarPago()">
+            Cancelar
+          </button>
+          <button
+            type="button"
+            class="btn btn-primary"
+            [disabled]="!pagoOperacion().trim()"
+            (click)="confirmarPago()"
+          >
+            <i class="bi bi-check2-circle me-1"></i>Confirmar Pago y Desembolso
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}

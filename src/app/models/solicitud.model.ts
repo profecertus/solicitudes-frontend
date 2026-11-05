@@ -50,9 +50,10 @@ export interface TimelineItem{
     id: number;
     solicitudId: number;
     estadoResultante: EstadoSolicitud;
+    estadoNombre: string;
     responsableId: number;
     responsableNombre: string;
-    comentario: string;
+    comentario: string | undefined;
     fechaAccion: string;
 }
 
