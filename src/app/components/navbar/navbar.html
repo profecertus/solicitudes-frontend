@@ -7,9 +7,26 @@
                 <small class="text-white-50 nh-navbar_subtitulo">Portal de Compras y Tesorería</small>
             </div>
         </a>
-        <div class="d-flex align-items-center text-white">
-            <i class="bi bi-person-circle fs-4 me-2"></i>
-            <span class="small fw-semibold">Juan Peréz (Solicitante)</span>
+        <!-- Selector Interactivo de Rol Activo para el Docente / Estudiantes -->
+        <div class="d-flex align-items-center gap-2 ms-auto">
+            <div class="input-group input-group-sm">
+            <span class="input-group-text bg-white bg-opacity-25 border-0 text-white px-2">
+                <i class="bi bi-person-badge"></i>
+                <span class="d-none d-sm-inline ms-1 small">Rol:</span>
+            </span>
+            <select
+                class="form-select form-select-sm border-0 fw-semibold text-dark shadow-sm bg-white"
+                style="min-width: 170px;"
+                [value]="rolService.usuarioActual().rol"
+                (change)="onRolChange($event)"
+            >
+                @for (item of rolService.rolesDisponibles; track item.rol) {
+                <option [value]="item.rol">
+                    {{ item.nombre }} ({{ item.titulo }})
+                </option>
+                }
+            </select>
+            </div>
         </div>
     </div>    
 </nav>
