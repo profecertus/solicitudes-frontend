@@ -1,0 +1,31 @@
+.kpi-icon-sm {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.nav-pills .nav-link {
+  color: #475569;
+  font-weight: 500;
+  font-size: 0.95rem;
+  padding: 8px 20px;
+}
+
+.nav-pills .nav-link.active {
+  background-color: #024b98;
+  color: #ffffff;
+}
+
+.modal-backdrop {
+  opacity: 0.5;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1040;
+  width: 100vw;
+  height: 100vh;
+  background-color: #000;
+}

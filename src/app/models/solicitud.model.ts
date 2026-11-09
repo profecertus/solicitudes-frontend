@@ -94,3 +94,26 @@ export interface Usuario{
     email: string;
     rol: RolUsuario;
   }
+
+  export interface AprobacionDto {
+    id: number;
+    solicitudId: number;
+    codigoSolicitud: string;
+    estadoResultante: EstadoSolicitud;
+    estadoNombre: string;
+    responsableId: number;
+    responsableNombre: string;
+    comentario: string | null;
+    fecha: string;
+  }
+
+  export interface MovimientoTesoreriaDto {
+    id: number;
+    solicitudId: number;
+    codigoSolicitud: string;
+    montoPagado: number;
+    medio: string;
+    referencia: string;
+    fechaPago: string;
+    creadoPor: string;
+  }

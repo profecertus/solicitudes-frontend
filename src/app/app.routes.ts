@@ -4,6 +4,8 @@ import { SolicitudForm } from './components/solicitud-form/solicitud-form';
 import { SolicitudesList } from './components/solicitudes-list/solicitudes-list';
 import { SolicitudDetail } from './components/solicitud-detail/solicitud-detail';
 import { Dashboard } from './components/dashboard/dashboard';
+import { AprobacionesComponent } from './components/aprobaciones/aprobaciones';
+import { TesoreriaComponent } from './components/tesoreria/tesoreria';
 
 export const routes: Routes = [
     {
@@ -14,7 +16,9 @@ export const routes: Routes = [
             { path:'dashboard', component:Dashboard},
             { path: 'solicitudes', component: SolicitudesList },
             { path: 'solicitudes/nueva', component: SolicitudForm },
-            { path: 'solicitudes/:id', component: SolicitudDetail }
+            { path: 'solicitudes/:id', component: SolicitudDetail },
+            { path: 'aprobaciones', component: AprobacionesComponent },
+            { path: 'tesoreria', component: TesoreriaComponent }
         ]
     },
     {path: '**', redirectTo: ''}

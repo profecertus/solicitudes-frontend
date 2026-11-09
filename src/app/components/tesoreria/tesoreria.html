@@ -1,0 +1,316 @@
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+  <div>
+    <h1 class="h3 fw-bold text-dark mb-1">
+      <i class="bi bi-cash-coin text-primary me-2"></i>Módulo de Tesorería
+    </h1>
+    <p class="text-muted mb-0">Gestión de desembolsos, pagos a proveedores y control de egresos presupuestales</p>
+  </div>
+
+  <div class="badge bg-light text-secondary border px-3 py-2 small shadow-sm">
+    <i class="bi bi-person-badge me-1"></i>
+    Rol activo: <strong class="text-dark">{{ rolService.usuarioActual().nombre }}</strong> ({{ rolService.usuarioActual().rol }})
+  </div>
+</div>
+
+<!-- KPI Mini Cards -->
+<div class="row g-3 mb-4">
+  <div class="col-6 col-md-3">
+    <div class="card border-0 shadow-sm rounded-3 p-3 bg-white h-100">
+      <div class="d-flex align-items-center gap-3">
+        <div class="kpi-icon-sm bg-primary bg-opacity-10 text-primary rounded-3">
+          <i class="bi bi-bank fs-4"></i>
+        </div>
+        <div>
+          <div class="fs-5 fw-bold text-dark">PEN {{ totalMontoPagado() | number:'1.2-2' }}</div>
+          <div class="small text-muted">Total Desembolsado</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-6 col-md-3">
+    <div class="card border-0 shadow-sm rounded-3 p-3 bg-white h-100">
+      <div class="d-flex align-items-center gap-3">
+        <div class="kpi-icon-sm bg-success bg-opacity-10 text-success rounded-3">
+          <i class="bi bi-receipt-cutoff fs-4"></i>
+        </div>
+        <div>
+          <div class="fs-4 fw-bold text-dark">{{ movimientos().length }}</div>
+          <div class="small text-muted">Pagos Ejecutados</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-6 col-md-3">
+    <div class="card border-0 shadow-sm rounded-3 p-3 bg-white h-100">
+      <div class="d-flex align-items-center gap-3">
+        <div class="kpi-icon-sm bg-warning bg-opacity-10 text-warning rounded-3">
+          <i class="bi bi-clock-history fs-4"></i>
+        </div>
+        <div>
+          <div class="fs-4 fw-bold text-dark">{{ solicitudesPendientesPago().length }}</div>
+          <div class="small text-muted">Pendientes de Pago</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-6 col-md-3">
+    <div class="card border-0 shadow-sm rounded-3 p-3 bg-white h-100">
+      <div class="d-flex align-items-center gap-3">
+        <div class="kpi-icon-sm bg-danger bg-opacity-10 text-danger rounded-3">
+          <i class="bi bi-wallet2 fs-4"></i>
+        </div>
+        <div>
+          <div class="fs-5 fw-bold text-dark">PEN {{ totalMontoPendiente() | number:'1.2-2' }}</div>
+          <div class="small text-muted">Comprometido por Pagar</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Tabs de navegación -->
+<ul class="nav nav-pills mb-4 bg-white p-2 rounded-3 shadow-sm border">
+  <li class="nav-item">
+    <button
+      class="nav-link rounded-pill"
+      [class.active]="tabActiva() === 'pendientes'"
+      (click)="tabActiva.set('pendientes')"
+      type="button">
+      <i class="bi bi-hourglass-top me-1"></i>Pendientes de Pago / Desembolso
+      <span class="badge rounded-pill ms-2" [class.bg-light]="tabActiva() === 'pendientes'" [class.text-dark]="tabActiva() === 'pendientes'" [class.bg-warning]="tabActiva() !== 'pendientes'">
+        {{ solicitudesPendientesPago().length }}
+      </span>
+    </button>
+  </li>
+  <li class="nav-item">
+    <button
+      class="nav-link rounded-pill"
+      [class.active]="tabActiva() === 'movimientos'"
+      (click)="tabActiva.set('movimientos')"
+      type="button">
+      <i class="bi bi-journal-check me-1"></i>Registro de Movimientos Financieros
+      <span class="badge rounded-pill ms-2" [class.bg-light]="tabActiva() === 'movimientos'" [class.text-dark]="tabActiva() === 'movimientos'" [class.bg-secondary]="tabActiva() !== 'movimientos'">
+        {{ movimientos().length }}
+      </span>
+    </button>
+  </li>
+</ul>
+
+<!-- TAB 1: PENDIENTES DE PAGO -->
+@if (tabActiva() === 'pendientes') {
+  @if (solicitudesPendientesPago().length === 0) {
+    <div class="card border-0 shadow-sm p-5 text-center bg-white rounded-3">
+      <i class="bi bi-check-circle-fill text-success fs-1 mb-2"></i>
+      <h5 class="fw-bold">No hay pagos pendientes</h5>
+      <p class="text-muted mb-0">Todas las solicitudes aprobadas han sido desembolsadas por Tesorería.</p>
+    </div>
+  } @else {
+    <div class="card border-0 shadow-sm rounded-3 overflow-hidden bg-white">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light text-uppercase small text-muted">
+            <tr>
+              <th scope="col" class="ps-4">Código</th>
+              <th scope="col">Motivo</th>
+              <th scope="col">Solicitante</th>
+              <th scope="col">Centro de Costo</th>
+              <th scope="col" class="text-end">Monto a Pagar</th>
+              <th scope="col" class="text-center">Estado</th>
+              <th scope="col" class="text-end pe-4">Acción de Tesorería</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of solicitudesPendientesPago(); track item.id) {
+              <tr>
+                <td class="ps-4 fw-bold">
+                  <a [routerLink]="['/solicitudes', item.id]" class="text-decoration-none">
+                    {{ item.codigo }}
+                  </a>
+                </td>
+                <td>
+                  <span class="fw-semibold text-dark">{{ item.motivo }}</span>
+                </td>
+                <td>
+                  <i class="bi bi-person me-1 text-muted"></i>{{ item.solicitanteNombre }}
+                </td>
+                <td>
+                  <span class="text-secondary small">{{ item.centroCostoNombre || 'General' }}</span>
+                </td>
+                <td class="text-end fw-bold text-success fs-6">
+                  PEN {{ item.montoTotal | number:'1.2-2' }}
+                </td>
+                <td class="text-center">
+                  <span class="badge bg-success">Aprobada</span>
+                </td>
+                <td class="text-end pe-4">
+                  <div class="btn-group btn-group-sm">
+                    @if (esRol(RolUsuario.Tesoreria)) {
+                      <button type="button" class="btn btn-primary" (click)="abrirModalPago(item)">
+                        <i class="bi bi-cash-coin me-1"></i>Registrar Pago
+                      </button>
+                    } @else {
+                      <span class="text-muted small me-2" title="Requiere rol Tesorería">
+                        <i class="bi bi-lock me-1"></i>Espera Tesorería
+                      </span>
+                    }
+
+                    <a [routerLink]="['/solicitudes', item.id]" class="btn btn-outline-secondary" title="Ver Detalle">
+                      <i class="bi bi-eye"></i>
+                    </a>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+}
+
+<!-- TAB 2: REGISTRO DE MOVIMIENTOS -->
+@if (tabActiva() === 'movimientos') {
+  <div class="card border-0 shadow-sm rounded-3 bg-white p-3 mb-3">
+    <div class="row g-2 align-items-center">
+      <div class="col-md-6">
+        <div class="input-group input-group-sm">
+          <span class="input-group-text bg-light border-end-0">
+            <i class="bi bi-search text-muted"></i>
+          </span>
+          <input
+            type="text"
+            class="form-control border-start-0 ps-0"
+            placeholder="Buscar por código, medio, operación o responsable..."
+            [ngModel]="filtroMovimientos()"
+            (ngModelChange)="filtroMovimientos.set($event)"
+          />
+        </div>
+      </div>
+      <div class="col-md-6 text-end">
+        <button type="button" class="btn btn-outline-secondary btn-sm" (click)="cargarMovimientos()">
+          <i class="bi bi-arrow-clockwise me-1"></i>Actualizar Movimientos
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card border-0 shadow-sm rounded-3 overflow-hidden bg-white">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light text-uppercase small text-muted">
+          <tr>
+            <th scope="col" class="ps-4">Fecha de Pago</th>
+            <th scope="col">Solicitud</th>
+            <th scope="col" class="text-end">Monto Desembolsado</th>
+            <th scope="col" class="text-center">Medio de Pago</th>
+            <th scope="col">N° Operación / Referencia</th>
+            <th scope="col" class="pe-4">Registrado Por</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (m of movimientosFiltrados(); track m.id) {
+            <tr>
+              <td class="ps-4 small text-muted">
+                {{ m.fechaPago | date:'dd/MM/yyyy HH:mm' }}
+              </td>
+              <td class="fw-bold">
+                <a [routerLink]="['/solicitudes', m.solicitudId]" class="text-decoration-none">
+                  {{ m.codigoSolicitud }}
+                </a>
+              </td>
+              <td class="text-end fw-bold text-dark">
+                PEN {{ m.montoPagado | number:'1.2-2' }}
+              </td>
+              <td class="text-center">
+                <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25">
+                  <i class="bi bi-credit-card me-1"></i>{{ m.medio }}
+                </span>
+              </td>
+              <td>
+                <code class="text-dark bg-light px-2 py-1 rounded">{{ m.referencia }}</code>
+              </td>
+              <td class="pe-4 text-secondary small">
+                <i class="bi bi-person me-1"></i>{{ m.creadoPor }}
+              </td>
+            </tr>
+          }
+          @if (movimientosFiltrados().length === 0) {
+            <tr>
+              <td colspan="6" class="text-center py-4 text-muted">
+                No se registraron movimientos financieros coincidentes.
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+}
+
+<!-- MODAL DE PAGO (TESORERÍA) -->
+@if (modalPagoAbierto()) {
+  <div class="modal-backdrop fade show"></div>
+  <div class="modal fade show d-block" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content shadow-lg border-0 rounded-4">
+        <div class="modal-header border-bottom-0 pb-0">
+          <h5 class="modal-title fw-bold">
+            <i class="bi bi-cash-coin text-primary me-2"></i>Registrar Desembolso - {{ solicitudSeleccionada()?.codigo }}
+          </h5>
+          <button type="button" class="btn-close" (click)="cancelarPago()"></button>
+        </div>
+        <div class="modal-body py-3">
+          <div class="alert alert-light border d-flex justify-content-between align-items-center mb-3">
+            <div>
+              <div class="small text-muted">Monto a pagar:</div>
+              <div class="h5 fw-bold text-success mb-0">
+                PEN {{ solicitudSeleccionada()?.montoTotal | number:'1.2-2' }}
+              </div>
+            </div>
+            <div class="text-end">
+              <div class="small text-muted">Beneficiario:</div>
+              <div class="fw-semibold text-dark">{{ solicitudSeleccionada()?.solicitanteNombre }}</div>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label small fw-semibold text-dark">Medio de Pago</label>
+            <select
+              class="form-select"
+              [ngModel]="pagoMedio()"
+              (ngModelChange)="pagoMedio.set($event)">
+              <option value="Transferencia Bancaria">Transferencia Bancaria</option>
+              <option value="Cheque de Gerencia">Cheque de Gerencia</option>
+              <option value="Débito Automático">Débito Automático</option>
+              <option value="Efectivo / Caja Chica">Efectivo / Caja Chica</option>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label small fw-semibold text-dark">
+              N° de Operación / Referencia Bancaria <span class="text-danger">*</span>
+            </label>
+            <input
+              type="text"
+              class="form-control"
+              placeholder="Ej: TRX-2026-98124"
+              [ngModel]="pagoOperacion()"
+              (ngModelChange)="pagoOperacion.set($event)"
+            />
+          </div>
+        </div>
+        <div class="modal-footer border-top-0 pt-0">
+          <button type="button" class="btn btn-outline-secondary rounded-pill px-4" (click)="cancelarPago()">
+            Cancelar
+          </button>
+          <button type="button" class="btn btn-primary rounded-pill px-4" (click)="confirmarPago()">
+            <i class="bi bi-check-lg me-1"></i>Confirmar Pago y Desembolso
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}

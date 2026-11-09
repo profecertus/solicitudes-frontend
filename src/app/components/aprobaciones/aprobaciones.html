@@ -1,0 +1,328 @@
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+  <div>
+    <h1 class="h3 fw-bold text-dark mb-1">
+      <i class="bi bi-check2-circle text-primary me-2"></i>Módulo de Aprobaciones
+    </h1>
+    <p class="text-muted mb-0">Gestión de revisión técnica, dictamen de gerencia y auditoría de decisiones</p>
+  </div>
+
+  <div class="badge bg-light text-secondary border px-3 py-2 small shadow-sm">
+    <i class="bi bi-person-badge me-1"></i>
+    Rol activo: <strong class="text-dark">{{ rolService.usuarioActual().nombre }}</strong> ({{ rolService.usuarioActual().rol }})
+  </div>
+</div>
+
+<!-- KPI Mini Cards -->
+<div class="row g-3 mb-4">
+  <div class="col-6 col-md-3">
+    <div class="card border-0 shadow-sm rounded-3 p-3 bg-white h-100">
+      <div class="d-flex align-items-center gap-3">
+        <div class="kpi-icon-sm bg-info bg-opacity-10 text-info rounded-3">
+          <i class="bi bi-send-fill fs-4"></i>
+        </div>
+        <div>
+          <div class="fs-4 fw-bold text-dark">{{ totalEnviadas() }}</div>
+          <div class="small text-muted">Enviadas (Sin Revisar)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-6 col-md-3">
+    <div class="card border-0 shadow-sm rounded-3 p-3 bg-white h-100">
+      <div class="d-flex align-items-center gap-3">
+        <div class="kpi-icon-sm bg-warning bg-opacity-10 text-warning rounded-3">
+          <i class="bi bi-hourglass-split fs-4"></i>
+        </div>
+        <div>
+          <div class="fs-4 fw-bold text-dark">{{ totalEnRevision() }}</div>
+          <div class="small text-muted">En Revisión Técnica</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-6 col-md-3">
+    <div class="card border-0 shadow-sm rounded-3 p-3 bg-white h-100">
+      <div class="d-flex align-items-center gap-3">
+        <div class="kpi-icon-sm bg-success bg-opacity-10 text-success rounded-3">
+          <i class="bi bi-check-circle-fill fs-4"></i>
+        </div>
+        <div>
+          <div class="fs-4 fw-bold text-dark">{{ totalAprobadas() }}</div>
+          <div class="small text-muted">Aprobadas Formalmente</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-6 col-md-3">
+    <div class="card border-0 shadow-sm rounded-3 p-3 bg-white h-100">
+      <div class="d-flex align-items-center gap-3">
+        <div class="kpi-icon-sm bg-danger bg-opacity-10 text-danger rounded-3">
+          <i class="bi bi-x-circle-fill fs-4"></i>
+        </div>
+        <div>
+          <div class="fs-4 fw-bold text-dark">{{ totalRechazadas() }}</div>
+          <div class="small text-muted">Rechazadas</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Tabs de navegación -->
+<ul class="nav nav-pills mb-4 bg-white p-2 rounded-3 shadow-sm border">
+  <li class="nav-item">
+    <button
+      class="nav-link rounded-pill"
+      [class.active]="tabActiva() === 'pendientes'"
+      (click)="tabActiva.set('pendientes')"
+      type="button">
+      <i class="bi bi-inbox-fill me-1"></i>Pendientes de Dictamen / Revisión
+      <span class="badge rounded-pill ms-2" [class.bg-light]="tabActiva() === 'pendientes'" [class.text-dark]="tabActiva() === 'pendientes'" [class.bg-warning]="tabActiva() !== 'pendientes'">
+        {{ solicitudesPendientes().length }}
+      </span>
+    </button>
+  </li>
+  <li class="nav-item">
+    <button
+      class="nav-link rounded-pill"
+      [class.active]="tabActiva() === 'historial'"
+      (click)="tabActiva.set('historial')"
+      type="button">
+      <i class="bi bi-clock-history me-1"></i>Historial de Auditoría de Aprobaciones
+      <span class="badge rounded-pill ms-2" [class.bg-light]="tabActiva() === 'historial'" [class.text-dark]="tabActiva() === 'historial'" [class.bg-secondary]="tabActiva() !== 'historial'">
+        {{ historialAprobaciones().length }}
+      </span>
+    </button>
+  </li>
+</ul>
+
+<!-- TAB 1: SOLICITUDES PENDIENTES -->
+@if (tabActiva() === 'pendientes') {
+  @if (solicitudesPendientes().length === 0) {
+    <div class="card border-0 shadow-sm p-5 text-center bg-white rounded-3">
+      <i class="bi bi-check-circle-fill text-success fs-1 mb-2"></i>
+      <h5 class="fw-bold">No hay solicitudes pendientes</h5>
+      <p class="text-muted mb-0">Todas las solicitudes han sido dictaminadas o procesadas.</p>
+    </div>
+  } @else {
+    <div class="card border-0 shadow-sm rounded-3 overflow-hidden bg-white">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light text-uppercase small text-muted">
+            <tr>
+              <th scope="col" class="ps-4">Código</th>
+              <th scope="col">Motivo</th>
+              <th scope="col">Solicitante</th>
+              <th scope="col">Centro Costo</th>
+              <th scope="col" class="text-end">Monto Total</th>
+              <th scope="col" class="text-center">Estado</th>
+              <th scope="col" class="text-end pe-4">Acciones de Workflow</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of solicitudesPendientes(); track item.id) {
+              <tr>
+                <td class="ps-4 fw-bold">
+                  <a [routerLink]="['/solicitudes', item.id]" class="text-decoration-none">
+                    {{ item.codigo }}
+                  </a>
+                </td>
+                <td>
+                  <span class="fw-semibold text-dark">{{ item.motivo }}</span>
+                </td>
+                <td>
+                  <i class="bi bi-person me-1 text-muted"></i>{{ item.solicitanteNombre }}
+                </td>
+                <td>
+                  <span class="text-secondary small">{{ item.centroCostoNombre || 'General' }}</span>
+                </td>
+                <td class="text-end fw-bold text-dark">
+                  PEN {{ item.montoTotal | number:'1.2-2' }}
+                </td>
+                <td class="text-center">
+                  <span [class]="obtenerClaseBadge(item.estado)">{{ item.estadoNombre }}</span>
+                </td>
+                <td class="text-end pe-4">
+                  <div class="btn-group btn-group-sm">
+                    <!-- Si está Enviada: acción de Revisor -->
+                    @if (item.estado === EstadoSolicitud.Enviada) {
+                      @if (esRol(RolUsuario.Revisor)) {
+                        <button type="button" class="btn btn-warning text-dark" (click)="iniciarRevision(item)">
+                          <i class="bi bi-hourglass-split me-1"></i>Revisar
+                        </button>
+                      } @else {
+                        <span class="text-muted small me-2" title="Requiere rol Revisor">
+                          <i class="bi bi-lock me-1"></i>Espera Revisor
+                        </span>
+                      }
+                    }
+
+                    <!-- Si está En Revisión: acciones de Aprobador -->
+                    @if (item.estado === EstadoSolicitud.EnRevision) {
+                      @if (esRol(RolUsuario.Aprobador)) {
+                        <button type="button" class="btn btn-success" (click)="abrirModalDictamen(item, 'aprobar')">
+                          <i class="bi bi-check-lg me-1"></i>Aprobar
+                        </button>
+                        <button type="button" class="btn btn-outline-danger" (click)="abrirModalDictamen(item, 'rechazar')">
+                          <i class="bi bi-x-lg me-1"></i>Rechazar
+                        </button>
+                      } @else {
+                        <span class="text-muted small me-2" title="Requiere rol Aprobador">
+                          <i class="bi bi-lock me-1"></i>Espera Aprobador
+                        </span>
+                      }
+                    }
+
+                    <a [routerLink]="['/solicitudes', item.id]" class="btn btn-outline-secondary" title="Ver Detalle">
+                      <i class="bi bi-eye"></i>
+                    </a>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+}
+
+<!-- TAB 2: HISTORIAL DE AUDITORÍA -->
+@if (tabActiva() === 'historial') {
+  <div class="card border-0 shadow-sm rounded-3 bg-white p-3 mb-3">
+    <div class="row g-2 align-items-center">
+      <div class="col-md-6">
+        <div class="input-group input-group-sm">
+          <span class="input-group-text bg-light border-end-0">
+            <i class="bi bi-search text-muted"></i>
+          </span>
+          <input
+            type="text"
+            class="form-control border-start-0 ps-0"
+            placeholder="Buscar por código, responsable, comentario o estado..."
+            [ngModel]="filtroHistorial()"
+            (ngModelChange)="filtroHistorial.set($event)"
+          />
+        </div>
+      </div>
+      <div class="col-md-6 text-end">
+        <button type="button" class="btn btn-outline-secondary btn-sm" (click)="cargarHistorial()">
+          <i class="bi bi-arrow-clockwise me-1"></i>Actualizar Historial
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card border-0 shadow-sm rounded-3 overflow-hidden bg-white">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light text-uppercase small text-muted">
+          <tr>
+            <th scope="col" class="ps-4">Fecha y Hora</th>
+            <th scope="col">Solicitud</th>
+            <th scope="col">Responsable</th>
+            <th scope="col" class="text-center">Estado Resultante</th>
+            <th scope="col" class="pe-4">Comentario / Dictamen</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of historialFiltrado(); track item.id) {
+            <tr>
+              <td class="ps-4 small text-muted">
+                {{ item.fecha | date:'dd/MM/yyyy HH:mm' }}
+              </td>
+              <td class="fw-bold">
+                <a [routerLink]="['/solicitudes', item.solicitudId]" class="text-decoration-none">
+                  {{ item.codigoSolicitud }}
+                </a>
+              </td>
+              <td>
+                <i class="bi bi-person-check text-primary me-1"></i>{{ item.responsableNombre }}
+              </td>
+              <td class="text-center">
+                <span [class]="obtenerClaseBadge(item.estadoResultante)">
+                  {{ item.estadoNombre }}
+                </span>
+              </td>
+              <td class="pe-4 text-secondary small">
+                {{ item.comentario || 'Sin comentario registrado' }}
+              </td>
+            </tr>
+          }
+          @if (historialFiltrado().length === 0) {
+            <tr>
+              <td colspan="5" class="text-center py-4 text-muted">
+                No se encontraron registros de auditoría de aprobaciones.
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+}
+
+<!-- MODAL DICTAMEN (APROBAR / RECHAZAR) -->
+@if (modalDictamenAbierto()) {
+  <div class="modal-backdrop fade show"></div>
+  <div class="modal fade show d-block" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content shadow-lg border-0 rounded-4">
+        <div class="modal-header border-bottom-0 pb-0">
+          <h5 class="modal-title fw-bold">
+            @if (dictamenTipo() === 'aprobar') {
+              <i class="bi bi-check-circle-fill text-success me-2"></i>Aprobar Solicitud {{ solicitudSeleccionada()?.codigo }}
+            } @else {
+              <i class="bi bi-x-circle-fill text-danger me-2"></i>Rechazar Solicitud {{ solicitudSeleccionada()?.codigo }}
+            }
+          </h5>
+          <button type="button" class="btn-close" (click)="cancelarDictamen()"></button>
+        </div>
+        <div class="modal-body py-3">
+          <p class="small text-muted mb-3">
+            @if (dictamenTipo() === 'aprobar') {
+              Está a punto de emitir dictamen aprobatorio formal para la solicitud de compra por un importe de
+              <strong>PEN {{ solicitudSeleccionada()?.montoTotal | number:'1.2-2' }}</strong>.
+            } @else {
+              Está a punto de rechazar la solicitud. Es obligatorio ingresar un motivo explicativo para el solicitante.
+            }
+          </p>
+
+          <div class="mb-3">
+            <label class="form-label small fw-semibold text-dark">
+              @if (dictamenTipo() === 'aprobar') {
+                Comentario u Observación de Aprobación (Opcional):
+              } @else {
+                Motivo del Rechazo <span class="text-danger">*</span>:
+              }
+            </label>
+            <textarea
+              class="form-control"
+              rows="3"
+              [placeholder]="dictamenTipo() === 'aprobar' ? 'Conforme para desembolso...' : 'Indique el motivo técnico o presupuestal...'"
+              [ngModel]="dictamenComentario()"
+              (ngModelChange)="dictamenComentario.set($event)"
+            ></textarea>
+          </div>
+        </div>
+        <div class="modal-footer border-top-0 pt-0">
+          <button type="button" class="btn btn-outline-secondary rounded-pill px-4" (click)="cancelarDictamen()">
+            Cancelar
+          </button>
+          @if (dictamenTipo() === 'aprobar') {
+            <button type="button" class="btn btn-success rounded-pill px-4" (click)="confirmarDictamen()">
+              <i class="bi bi-check-lg me-1"></i>Confirmar Aprobación
+            </button>
+          } @else {
+            <button type="button" class="btn btn-danger rounded-pill px-4" (click)="confirmarDictamen()">
+              <i class="bi bi-x-circle me-1"></i>Confirmar Rechazo
+            </button>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+}

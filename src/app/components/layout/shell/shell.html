@@ -33,13 +33,23 @@
           <span class="text-muted text-uppercase small px-3 fw-bold sidebar-group-title">Módulos</span>
         </li>
         <li class="nav-item">
-          <a class="nav-link rounded px-3 py-2 text-secondary" href="javascript:void(0)">
-            <i class="bi bi-check2-circle me-2"></i>Aprobaciones
+          <a class="nav-link rounded px-3 py-2 text-dark d-flex justify-content-between align-items-center"
+             routerLink="/aprobaciones"
+             routerLinkActive="active">
+            <span><i class="bi bi-check2-circle me-2 text-primary"></i>Aprobaciones</span>
+            @if (conteoAprobaciones() > 0) {
+              <span class="badge bg-warning text-dark rounded-pill">{{ conteoAprobaciones() }}</span>
+            }
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link rounded px-3 py-2 text-secondary" href="javascript:void(0)">
-            <i class="bi bi-cash-coin me-2"></i>Tesorería
+          <a class="nav-link rounded px-3 py-2 text-dark d-flex justify-content-between align-items-center"
+             routerLink="/tesoreria"
+             routerLinkActive="active">
+            <span><i class="bi bi-cash-coin me-2 text-success"></i>Tesorería</span>
+            @if (conteoTesoreria() > 0) {
+              <span class="badge bg-success rounded-pill">{{ conteoTesoreria() }}</span>
+            }
           </a>
         </li>
       </ul>
