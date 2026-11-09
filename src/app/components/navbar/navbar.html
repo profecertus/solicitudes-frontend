@@ -7,7 +7,7 @@
                 <small class="text-white-50 nh-navbar_subtitulo">Portal de Compras y Tesorería</small>
             </div>
         </a>
-        <!-- Selector Interactivo de Rol Activo para el Docente / Estudiantes -->
+        <!-- Selector Interactivo de Rol Activo para el Docente / Estudiantes y Cerrar Sesión -->
         <div class="d-flex align-items-center gap-2 ms-auto">
             <div class="input-group input-group-sm">
             <span class="input-group-text bg-white bg-opacity-25 border-0 text-white px-2">
@@ -26,6 +26,16 @@
                 }
             </select>
             </div>
+
+            <!-- Botón Cerrar Sesión -->
+            <button
+                type="button"
+                class="btn btn-outline-light btn-sm d-flex align-items-center gap-1 shadow-sm px-2 px-md-3"
+                (click)="cerrarSesion()"
+                title="Cerrar Sesión">
+                <i class="bi bi-box-arrow-right"></i>
+                <span class="d-none d-sm-inline">Salir</span>
+            </button>
         </div>
     </div>    
 </nav>
