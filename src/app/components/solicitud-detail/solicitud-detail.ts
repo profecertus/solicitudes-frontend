@@ -1,12 +1,13 @@
 import { Component, inject, signal } from '@angular/core';
 import { OnInit } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
-import { CommonModule } from '@angular/common';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { CommonModule, Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SolicitudService } from '../../services/solicitud.service';
 import { NotificationService } from '../../services/notification.service';
 import { EstadoSolicitud, RolUsuario, Solicitud, TimelineItem } from '../../models/solicitud.model';
 import { RolService } from '../../services/rol.service';
+import { HashService } from '../../services/hash.service';
 
 @Component({
   selector: 'app-solicitud-detail',
@@ -15,9 +16,12 @@ import { RolService } from '../../services/rol.service';
   styleUrl: './solicitud-detail.css',
 })
 export class SolicitudDetail implements OnInit{
- private route = inject(ActivatedRoute);
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private location = inject(Location);
   private httpService = inject(SolicitudService);
   private notify = inject(NotificationService);
+  private hashService = inject(HashService);
   rolService = inject(RolService);
 
   readonly EstadoSolicitud = EstadoSolicitud;
@@ -43,7 +47,22 @@ export class SolicitudDetail implements OnInit{
   ];
 
   ngOnInit(): void {
-    const id = Number(this.route.snapshot.paramMap.get('id'));
+    const rawParam = this.route.snapshot.paramMap.get('id') || '';
+    const id = this.hashService.decode(rawParam);
+
+    if (!id) {
+      this.notify.error('Identificador de solicitud no válido');
+      this.router.navigate(['/solicitudes']);
+      return;
+    }
+
+    // Si el usuario ingresó con el ID plano (ej. /solicitudes/6),
+    // ofuscar y actualizar la URL en la barra de navegación de inmediato
+    if (/^\d+$/.test(rawParam)) {
+      const hash = this.hashService.encode(id);
+      this.location.replaceState(`/solicitudes/${hash}`);
+    }
+
     this.cargarSolicitud(id);
     this.cargarTimeline(id);
   }

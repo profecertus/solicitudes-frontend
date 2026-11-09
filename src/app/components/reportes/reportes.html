@@ -195,7 +195,7 @@
         @for (item of solicitudesFiltradas(); track item.id) {
           <tr>
             <td class="ps-4 fw-bold">
-              <a [routerLink]="['/solicitudes', item.id]" class="text-decoration-none">
+              <a [routerLink]="['/solicitudes', item.id | hashId]" class="text-decoration-none">
                 {{ item.codigo }}
               </a>
             </td>

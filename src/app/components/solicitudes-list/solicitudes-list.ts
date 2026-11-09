@@ -6,10 +6,11 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { SolicitudFiltro } from './components/solicitud-filtro/solicitud-filtro';
 import { NotificationService } from '../../services/notification.service';
+import { HashIdPipe } from '../../pipes/hash-id.pipe';
 
 @Component({
   selector: 'app-solicitudes-list',
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, HashIdPipe],
   templateUrl: './solicitudes-list.html',
   styleUrl: './solicitudes-list.css',
 })

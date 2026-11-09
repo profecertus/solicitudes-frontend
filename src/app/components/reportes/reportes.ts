@@ -6,10 +6,11 @@ import { SolicitudService } from '../../services/solicitud.service';
 import { ExportService } from '../../services/export.service';
 import { NotificationService } from '../../services/notification.service';
 import { EstadoSolicitud, Solicitud } from '../../models/solicitud.model';
+import { HashIdPipe } from '../../pipes/hash-id.pipe';
 
 @Component({
   selector: 'app-reportes',
-  imports: [CommonModule, RouterLink, FormsModule],
+  imports: [CommonModule, RouterLink, FormsModule, HashIdPipe],
   templateUrl: './reportes.html',
   styleUrl: './reportes.css'
 })

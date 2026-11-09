@@ -70,7 +70,7 @@
             <td class="text-center pe-4">
               <div class="btn-group btn-group-sm" role="group">
                 <a
-                  [routerLink]="['/solicitudes', s.id]"
+                  [routerLink]="['/solicitudes', s.id | hashId]"
                   class="btn btn-primary"
                   title="Gestionar en Workflow"
                 >

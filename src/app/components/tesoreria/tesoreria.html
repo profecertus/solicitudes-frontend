@@ -126,7 +126,7 @@
             @for (item of solicitudesPendientesPago(); track item.id) {
               <tr>
                 <td class="ps-4 fw-bold">
-                  <a [routerLink]="['/solicitudes', item.id]" class="text-decoration-none">
+                  <a [routerLink]="['/solicitudes', item.id | hashId]" class="text-decoration-none">
                     {{ item.codigo }}
                   </a>
                 </td>
@@ -157,7 +157,7 @@
                       </span>
                     }
 
-                    <a [routerLink]="['/solicitudes', item.id]" class="btn btn-outline-secondary" title="Ver Detalle">
+                    <a [routerLink]="['/solicitudes', item.id | hashId]" class="btn btn-outline-secondary" title="Ver Detalle">
                       <i class="bi bi-eye"></i>
                     </a>
                   </div>
@@ -217,7 +217,7 @@
                 {{ m.fechaPago | date:'dd/MM/yyyy HH:mm' }}
               </td>
               <td class="fw-bold">
-                <a [routerLink]="['/solicitudes', m.solicitudId]" class="text-decoration-none">
+                <a [routerLink]="['/solicitudes', m.solicitudId | hashId]" class="text-decoration-none">
                   {{ m.codigoSolicitud }}
                 </a>
               </td>

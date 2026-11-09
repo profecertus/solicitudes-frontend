@@ -7,10 +7,11 @@ import { AprobacionService } from '../../services/aprobacion.service';
 import { RolService } from '../../services/rol.service';
 import { NotificationService } from '../../services/notification.service';
 import { AprobacionDto, EstadoSolicitud, RolUsuario, Solicitud } from '../../models/solicitud.model';
+import { HashIdPipe } from '../../pipes/hash-id.pipe';
 
 @Component({
   selector: 'app-aprobaciones',
-  imports: [CommonModule, RouterLink, FormsModule],
+  imports: [CommonModule, RouterLink, FormsModule, HashIdPipe],
   templateUrl: './aprobaciones.html',
   styleUrl: './aprobaciones.css'
 })

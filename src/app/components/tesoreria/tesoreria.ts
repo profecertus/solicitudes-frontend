@@ -7,10 +7,11 @@ import { TesoreriaService } from '../../services/tesoreria.service';
 import { RolService } from '../../services/rol.service';
 import { NotificationService } from '../../services/notification.service';
 import { EstadoSolicitud, MovimientoTesoreriaDto, RolUsuario, Solicitud } from '../../models/solicitud.model';
+import { HashIdPipe } from '../../pipes/hash-id.pipe';
 
 @Component({
   selector: 'app-tesoreria',
-  imports: [CommonModule, RouterLink, FormsModule],
+  imports: [CommonModule, RouterLink, FormsModule, HashIdPipe],
   templateUrl: './tesoreria.html',
   styleUrl: './tesoreria.css'
 })
