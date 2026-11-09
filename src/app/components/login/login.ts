@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
@@ -12,7 +12,7 @@ import { RolUsuario } from '../../models/solicitud.model';
   templateUrl: './login.html',
   styleUrl: './login.css'
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   readonly authService = inject(AuthService);
   private readonly router = inject(Router);
@@ -23,11 +23,20 @@ export class LoginComponent {
   readonly mensajeError = signal<string | null>(null);
   readonly mostrarPassword = signal<boolean>(false);
 
-  // Formulario reactivo con validaciones sincrónicas
+  // Formulario reactivo con soporte para persistencia en localStorage
   readonly loginForm = this.fb.group({
     email: ['ana.torres@solicitudes.com', [Validators.required, Validators.email]],
-    password: ['123456', [Validators.required, Validators.minLength(6)]]
+    password: ['123456', [Validators.required, Validators.minLength(6)]],
+    recordar: [true] // Checkbox para indicar guardado permanente en localStorage
   });
+
+  ngOnInit(): void {
+    // Si hay un email recordado en localStorage, precargarlo en el formulario
+    const emailRecordado = this.authService.obtenerUltimoEmail();
+    if (emailRecordado) {
+      this.loginForm.patchValue({ email: emailRecordado });
+    }
+  }
 
   esInvalido(campo: string): boolean {
     const control = this.loginForm.get(campo);
@@ -44,13 +53,13 @@ export class LoginComponent {
       return;
     }
 
-    const { email, password } = this.loginForm.getRawValue();
+    const { email, password, recordar } = this.loginForm.getRawValue();
     if (!email || !password) return;
 
     this.cargando.set(true);
     this.mensajeError.set(null);
 
-    this.authService.login(email, password).subscribe({
+    this.authService.login(email, password, !!recordar).subscribe({
       next: (user) => {
         this.cargando.set(false);
         this.notify.success(`¡Bienvenido(a), ${user.nombre}! Has ingresado con el rol ${user.rol}.`);
@@ -71,7 +80,8 @@ export class LoginComponent {
   seleccionarDemo(email: string, rol: string): void {
     this.loginForm.patchValue({
       email: email,
-      password: '123456'
+      password: '123456',
+      recordar: true
     });
     this.ingresar();
   }
