@@ -74,28 +74,65 @@ export interface PagedResult<T>{
 }
 
 export interface Usuario{
-    id: number,
-    nombre: string,
-    correo: string,
-    activo: boolean,
-    fechaCreacion: string,
-    roles: RolItem[]
-  }
-
-  export interface RolItem{
-    id: number,
-    nombre: string,
-    limiteAprobacion: number,
-  }
-
-  export interface UsuarioActivo{
     id: number;
+    username?: string;
+    nombre: string;
+    correo: string;
+    activo: boolean;
+    fechaCreacion: string;
+    roles: RolItem[];
+}
+
+export interface RolItem{
+    id: number;
+    nombre: string;
+    limiteAprobacion: number;
+}
+
+export interface UsuarioActivo{
+    id: number;
+    username?: string;
     nombre: string;
     email: string;
     rol: RolUsuario;
-  }
+}
 
-  export interface AprobacionDto {
+export interface LoginRequestDto {
+    usuario?: string;
+    username?: string;
+    correo?: string;
+    email?: string;
+    password: string;
+    ttlMinutos?: number;
+    ttlSegundos?: number;
+}
+
+export interface JwtTokenDto {
+    token: string;
+    tokenType: string;
+    ttlSeconds: number;
+    ttlMinutes: number;
+    fechaEmisionUtc: string;
+    fechaExpiracionUtc: string;
+}
+
+export interface AuthResponseDto {
+    id: number;
+    username: string;
+    nombre: string;
+    correo: string;
+    email: string;
+    rol: string;
+    roles: string[];
+    token: string;
+    tokenType: string;
+    ttlSeconds: number;
+    ttlMinutes: number;
+    fechaEmisionUtc: string;
+    expiracion: string;
+}
+
+export interface AprobacionDto {
     id: number;
     solicitudId: number;
     codigoSolicitud: string;
@@ -105,9 +142,9 @@ export interface Usuario{
     responsableNombre: string;
     comentario: string | null;
     fecha: string;
-  }
+}
 
-  export interface MovimientoTesoreriaDto {
+export interface MovimientoTesoreriaDto {
     id: number;
     solicitudId: number;
     codigoSolicitud: string;
@@ -116,4 +153,4 @@ export interface Usuario{
     referencia: string;
     fechaPago: string;
     creadoPor: string;
-  }
+}

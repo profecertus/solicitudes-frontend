@@ -4,7 +4,6 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { NotificationService } from '../../services/notification.service';
-import { RolUsuario } from '../../models/solicitud.model';
 
 @Component({
   selector: 'app-login',
@@ -23,18 +22,19 @@ export class LoginComponent implements OnInit {
   readonly mensajeError = signal<string | null>(null);
   readonly mostrarPassword = signal<boolean>(false);
 
-  // Formulario reactivo con soporte para persistencia en localStorage
+  // Formulario reactivo que consume POST /api/auth/login enviando usuario/correo, password y TTL en segundos
   readonly loginForm = this.fb.group({
-    email: ['ana.torres@solicitudes.com', [Validators.required, Validators.email]],
+    email: ['ana.torres', [Validators.required, Validators.minLength(3)]],
     password: ['123456', [Validators.required, Validators.minLength(6)]],
-    recordar: [true] // Checkbox para indicar guardado permanente en localStorage
+    ttlSegundos: [20, [Validators.required, Validators.min(5)]],
+    recordar: [true]
   });
 
   ngOnInit(): void {
-    // Si hay un email recordado en localStorage, precargarlo en el formulario
     const emailRecordado = this.authService.obtenerUltimoEmail();
     if (emailRecordado) {
-      this.loginForm.patchValue({ email: emailRecordado });
+      const ttlInicial = emailRecordado.toLowerCase().startsWith('ana.torres') ? 20 : 3600;
+      this.loginForm.patchValue({ email: emailRecordado, ttlSegundos: ttlInicial });
     }
   }
 
@@ -53,34 +53,35 @@ export class LoginComponent implements OnInit {
       return;
     }
 
-    const { email, password, recordar } = this.loginForm.getRawValue();
+    const { email, password, ttlSegundos, recordar } = this.loginForm.getRawValue();
     if (!email || !password) return;
 
     this.cargando.set(true);
     this.mensajeError.set(null);
 
-    this.authService.login(email, password, !!recordar).subscribe({
+    this.authService.login(email, password, !!recordar, undefined, ttlSegundos ?? 20).subscribe({
       next: (user) => {
         this.cargando.set(false);
-        this.notify.success(`¡Bienvenido(a), ${user.nombre}! Has ingresado con el rol ${user.rol}.`);
-        
-        // Redirigir a la URL previa o a /dashboard
+        this.notify.success(
+          `¡Bienvenido(a), ${user.nombre}! JWT generado con TTL de ${user.ttlSeconds} segundos.`
+        );
+
         const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/dashboard';
         this.router.navigateByUrl(returnUrl);
       },
       error: (err) => {
         this.cargando.set(false);
-        this.mensajeError.set(err.message || 'Error al autenticar.');
-        this.notify.error('Credenciales incorrectas');
+        this.mensajeError.set(err?.message || 'Credenciales inválidas o error al conectar con el backend.');
       }
     });
   }
 
-  // Acceso rápido para demostraciones y pruebas del flujo
-  seleccionarDemo(email: string, rol: string): void {
+  // Acceso rápido para demostraciones consumiendo las credenciales reales de la BD
+  seleccionarDemo(usuarioOCorreo: string, password: string = '123456', ttlSegundos: number = 3600): void {
     this.loginForm.patchValue({
-      email: email,
-      password: '123456',
+      email: usuarioOCorreo,
+      password: password,
+      ttlSegundos: ttlSegundos,
       recordar: true
     });
     this.ingresar();

@@ -1,7 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
 import { NotificationService } from '../../services/notification.service';
-import { RolService } from '../../services/rol.service';
-import { RolUsuario } from '../../models/solicitud.model';
 import { LoadingServices } from '../../services/loading.service';
 import { AuthService } from '../../services/auth.service';
 
@@ -11,10 +9,9 @@ import { AuthService } from '../../services/auth.service';
   templateUrl: './navbar.html',
   styleUrl: './navbar.css',
 })
-export class Navbar {  
+export class Navbar {
   loadingService = inject(LoadingServices);
   notificationService = inject(NotificationService);
-  rolService = inject(RolService);
   authService = inject(AuthService);
 
   readonly sidebarAbierto = signal<boolean>(false);
@@ -23,11 +20,14 @@ export class Navbar {
     this.sidebarAbierto.update(v => !v);
   }
 
-  onRolChange(event:Event): void {
-    const select = event.target as HTMLSelectElement;
-    const nuevoRol = select.value as RolUsuario;
-    this.rolService.cambiarRol(nuevoRol);
-    this.notificationService.info(`Rol cambiado a: ${nuevoRol}`);
+  verificarTokenServidor(): void {
+    this.authService.obtenerSesionServidor().subscribe({
+      next: (info) => {
+        this.notificationService.success(
+          `JWT válido en servidor para @${info.username} | TTL restante: ${info.ttlRestanteSegundos}s`
+        );
+      }
+    });
   }
 
   cerrarSesion(): void {

@@ -7,25 +7,26 @@
                 <small class="text-white-50 nh-navbar_subtitulo">Portal de Compras y Tesorería</small>
             </div>
         </a>
-        <!-- Selector Interactivo de Rol Activo para el Docente / Estudiantes y Cerrar Sesión -->
+        <!-- Indicador de Usuario Autenticado, JWT TTL y Cerrar Sesión -->
         <div class="d-flex align-items-center gap-2 ms-auto">
-            <div class="input-group input-group-sm">
-            <span class="input-group-text bg-white bg-opacity-25 border-0 text-white px-2">
-                <i class="bi bi-person-badge"></i>
-                <span class="d-none d-sm-inline ms-1 small">Rol:</span>
-            </span>
-            <select
-                class="form-select form-select-sm border-0 fw-semibold text-dark shadow-sm bg-white"
-                style="min-width: 170px;"
-                (change)="onRolChange($event)"
-            >
-                @for (item of rolService.rolesDisponibles(); track item.rol) {
-                    <option [value]="item.rol" [selected]="item.rol === rolService.usuarioActual().rol">
-                        {{ item.nombre }} ({{ item.titulo }})
-                    </option>
-                }
-            </select>
-            </div>
+            @if (authService.currentUser(); as user) {
+                <button
+                    type="button"
+                    class="btn btn-sm btn-dark bg-opacity-50 border border-light border-opacity-25 d-flex align-items-center gap-2 text-white px-3 py-1"
+                    (click)="verificarTokenServidor()"
+                    title="Clic para validar el token JWT y su TTL contra GET /api/auth/me">
+                    <i class="bi bi-person-circle text-info"></i>
+                    <span class="small fw-semibold">{{ user.nombre }} (@{{ user.username }})</span>
+                    <span
+                        class="badge ms-1"
+                        [class.bg-danger]="authService.ttlRestanteSegundos() <= 10"
+                        [class.bg-warning]="authService.ttlRestanteSegundos() > 10"
+                        [class.text-dark]="authService.ttlRestanteSegundos() > 10"
+                        [class.text-white]="authService.ttlRestanteSegundos() <= 10">
+                        <i class="bi bi-stopwatch me-1"></i>TTL: {{ authService.ttlFormateado() }}
+                    </span>
+                </button>
+            }
 
             <!-- Botón Cerrar Sesión -->
             <button

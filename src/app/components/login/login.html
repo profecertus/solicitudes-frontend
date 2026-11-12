@@ -12,7 +12,7 @@
     <div class="card-body p-4 p-md-5 bg-white">
       <div class="text-center mb-4">
         <h5 class="fw-bold text-dark mb-1">Inicio de Sesión</h5>
-        <small class="text-muted">Ingrese sus credenciales corporativas autorizadas</small>
+        <small class="text-muted">Autenticación JWT contra Base de Datos con TTL</small>
       </div>
 
       <!-- Alerta de Error -->
@@ -25,30 +25,30 @@
 
       <!-- Formulario Reactivo de Login -->
       <form [formGroup]="loginForm" (ngSubmit)="ingresar()">
-        <!-- Campo Correo -->
+        <!-- Campo Usuario o Correo -->
         <div class="mb-3">
-          <label class="form-label small fw-semibold text-dark">Correo Electrónico</label>
+          <label class="form-label small fw-semibold text-dark">Usuario o Correo Electrónico</label>
           <div class="input-group">
             <span class="input-group-text bg-light text-muted border-end-0">
-              <i class="bi bi-envelope"></i>
+              <i class="bi bi-person-badge"></i>
             </span>
             <input
-              type="email"
+              type="text"
               class="form-control border-start-0 ps-0"
               [class.is-invalid]="esInvalido('email')"
               formControlName="email"
-              placeholder="nombre@solicitudes.com"
+              placeholder="ana.torres o ana.torres@solicitudes.com"
             />
           </div>
           @if (esInvalido('email')) {
             <div class="text-danger small mt-1">
-              Ingrese un correo electrónico válido.
+              Ingrese un usuario o correo válido (mínimo 3 caracteres).
             </div>
           }
         </div>
 
         <!-- Campo Contraseña -->
-        <div class="mb-4">
+        <div class="mb-3">
           <div class="d-flex justify-content-between align-items-center mb-1">
             <label class="form-label small fw-semibold text-dark mb-0">Contraseña</label>
             <span class="text-muted small">Mínimo 6 caracteres</span>
@@ -78,6 +78,20 @@
           }
         </div>
 
+        <!-- Selector de TTL (Tiempo de vida del JWT) -->
+        <div class="mb-3">
+          <label class="form-label small fw-semibold text-dark">
+            <i class="bi bi-clock-history me-1 text-primary"></i>Tiempo de Vida del Token JWT (TTL)
+          </label>
+          <select class="form-select form-select-sm" formControlName="ttlSegundos">
+            <option [ngValue]="20">20 segundos (Prueba rápida de expiración)</option>
+            <option [ngValue]="60">1 minuto (60 seg)</option>
+            <option [ngValue]="300">5 minutos (300 seg)</option>
+            <option [ngValue]="900">15 minutos (900 seg)</option>
+            <option [ngValue]="3600">60 minutos (3600 seg)</option>
+          </select>
+        </div>
+
         <!-- Checkbox Recordar Sesión con localStorage -->
         <div class="d-flex align-items-center justify-content-between mb-4">
           <div class="form-check">
@@ -100,59 +114,80 @@
           [disabled]="loginForm.invalid || cargando()">
           @if (cargando()) {
             <span class="spinner-border spinner-border-sm me-2" role="status"></span>
-            Verificando credenciales...
+            Autenticando en Base de Datos...
           } @else {
             <i class="bi bi-box-arrow-in-right me-1"></i>Acceder al Sistema
           }
         </button>
       </form>
 
-      <!-- SECCIÓN DE ACCESO RÁPIDO PARA PRUEBAS Y DOCENCIA -->
+      <!-- SECCIÓN DE ACCESO RÁPIDO PARA PRUEBAS CON REGISTROS DE LA BD -->
       <div class="mt-4 pt-3 border-top">
         <div class="text-center mb-2">
           <span class="badge bg-light text-secondary border px-2 py-1 small fw-semibold">
-            <i class="bi bi-lightning-charge-fill text-warning me-1"></i>Accesos de Prueba por Rol
+            <i class="bi bi-database-check text-primary me-1"></i>Usuarios en Base de Datos
           </span>
         </div>
         <p class="small text-muted text-center mb-3">
-          Haga clic en cualquiera de los perfiles para ingresar automáticamente:
+          Haga clic en un usuario para autenticar contra <code>POST /api/auth/login</code>:
         </p>
 
         <div class="row g-2">
           <div class="col-6">
             <button
               type="button"
-              class="btn btn-outline-primary btn-sm w-100 text-start py-2 px-2 rounded-3"
-              (click)="seleccionarDemo('ana.torres@solicitudes.com', 'Solicitante')">
-              <div class="fw-bold small text-truncate">Ana Torres</div>
-              <div class="text-muted" style="font-size: 0.72rem;">Rol: Solicitante</div>
+              class="btn btn-outline-danger btn-sm w-100 text-start py-2 px-2 rounded-3"
+              (click)="seleccionarDemo('ana.torres', '123456', 20)">
+              <div class="d-flex justify-content-between align-items-center">
+                <span class="fw-bold small text-truncate">ana.torres</span>
+                <span class="badge bg-danger" style="font-size: 0.65rem;">TTL 20s</span>
+              </div>
+              <div class="text-muted" style="font-size: 0.72rem;">Ana Torres (Prueba 20 seg)</div>
             </button>
           </div>
           <div class="col-6">
             <button
               type="button"
               class="btn btn-outline-warning btn-sm w-100 text-start py-2 px-2 rounded-3 text-dark"
-              (click)="seleccionarDemo('bruno.diaz@solicitudes.com', 'Revisor')">
-              <div class="fw-bold small text-truncate">Bruno Diaz</div>
-              <div class="text-muted" style="font-size: 0.72rem;">Rol: Revisor</div>
+              (click)="seleccionarDemo('bruno.diaz', '123456', 3600)">
+              <div class="d-flex justify-content-between align-items-center">
+                <span class="fw-bold small text-truncate">bruno.diaz</span>
+                <span class="badge bg-secondary" style="font-size: 0.65rem;">TTL 60m</span>
+              </div>
+              <div class="text-muted" style="font-size: 0.72rem;">Bruno Diaz</div>
             </button>
           </div>
           <div class="col-6">
             <button
               type="button"
               class="btn btn-outline-success btn-sm w-100 text-start py-2 px-2 rounded-3"
-              (click)="seleccionarDemo('carla.ruiz@solicitudes.com', 'Aprobador')">
-              <div class="fw-bold small text-truncate">Carla Ruiz</div>
-              <div class="text-muted" style="font-size: 0.72rem;">Rol: Aprobador</div>
+              (click)="seleccionarDemo('carla.ruiz', '123456', 3600)">
+              <div class="d-flex justify-content-between align-items-center">
+                <span class="fw-bold small text-truncate">carla.ruiz</span>
+                <span class="badge bg-secondary" style="font-size: 0.65rem;">TTL 60m</span>
+              </div>
+              <div class="text-muted" style="font-size: 0.72rem;">Carla Ruiz</div>
             </button>
           </div>
           <div class="col-6">
             <button
               type="button"
               class="btn btn-outline-info btn-sm w-100 text-start py-2 px-2 rounded-3 text-dark"
-              (click)="seleccionarDemo('diego.paz@solicitudes.com', 'Tesoreria')">
-              <div class="fw-bold small text-truncate">Diego Paz</div>
-              <div class="text-muted" style="font-size: 0.72rem;">Rol: Tesorería</div>
+              (click)="seleccionarDemo('diego.paz', '123456', 3600)">
+              <div class="d-flex justify-content-between align-items-center">
+                <span class="fw-bold small text-truncate">diego.paz</span>
+                <span class="badge bg-secondary" style="font-size: 0.65rem;">TTL 60m</span>
+              </div>
+              <div class="text-muted" style="font-size: 0.72rem;">Diego Paz</div>
+            </button>
+          </div>
+          <div class="col-12">
+            <button
+              type="button"
+              class="btn btn-outline-dark btn-sm w-100 text-center py-2 px-2 rounded-3"
+              (click)="seleccionarDemo('admin', 'admin123', 3600)">
+              <span class="fw-bold small">admin</span>
+              <span class="text-muted ms-1" style="font-size: 0.72rem;">— Administrador Sistema (TTL 60m)</span>
             </button>
           </div>
         </div>
